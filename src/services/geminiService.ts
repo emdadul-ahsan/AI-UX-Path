@@ -63,19 +63,20 @@ export const generateRoadmap = async (topic: string): Promise<Roadmap> => {
 export const generateResources = async (nodeTitle: string, nodeDescription: string): Promise<Resource[]> => {
   const ai = getGenAI();
   const response = await ai.models.generateContent({
-    model: 'gemini-2.5-flash-lite',
-    contents: `Suggest 3 to 5 high-quality learning resources (especially YouTube videos, articles, or courses) for a UX/Product designer learning about: ${nodeTitle}. Context: ${nodeDescription}. Provide real or highly realistic titles and URLs (e.g., youtube.com/watch?v=...).`,
+    model: 'gemini-3-flash-preview',
+    contents: `Find 3 to 5 REAL, highly-rated learning resources (YouTube videos, articles, or courses) for a UX/Product designer learning about: "${nodeTitle}". Context: ${nodeDescription}. You MUST use Google Search to find actual, working URLs. Do not make up URLs. Return the results as a JSON array.`,
     config: {
+      tools: [{ googleSearch: {} }],
       responseMimeType: 'application/json',
       responseSchema: {
         type: Type.ARRAY,
         items: {
           type: Type.OBJECT,
           properties: {
-            title: { type: Type.STRING },
-            url: { type: Type.STRING },
+            title: { type: Type.STRING, description: 'The actual title of the resource' },
+            url: { type: Type.STRING, description: 'The real, working URL found via search' },
             type: { type: Type.STRING, description: '"video", "article", or "course"' },
-            description: { type: Type.STRING }
+            description: { type: Type.STRING, description: 'A short description of why this is useful' }
           },
           required: ['title', 'url', 'type', 'description']
         }
